@@ -1,0 +1,15 @@
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+@font-face {
+  font-family: 'Roboto', sans-serif;
+  src: local("Roboto"),
+  url(~assets/fonts/Roboto-Regular.ttf) format("truetype");
+}
+
+html {
+  font-family: 'Roboto', sans-serif;
+}
