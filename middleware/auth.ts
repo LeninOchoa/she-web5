@@ -1,10 +1,11 @@
 import { Middleware } from '@nuxt/types'
+import { authStore } from '@/store'
 const auth: Middleware = (context) => {
   if (context.route.fullPath.includes('/frau')) {
     return
   }
 
-  if (!context.store.getters['auth/isAutheticated']) {
+  if (!authStore.isAutheticated) {
     context.redirect('/signin')
   }
 }

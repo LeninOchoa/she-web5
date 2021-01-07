@@ -1,10 +1,10 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
+import { sheStore } from '@/store'
 // @ts-ignore
 import Cookies from 'js-cookie'
 import SyniosModules from '../models/SyniosModules'
 import Login from '../models/Login'
 import { $axios } from '~/utils/axios'
-import { sheStore } from '~/store'
 
 @Module({
   name: 'auth',
@@ -12,20 +12,18 @@ import { sheStore } from '~/store'
   stateFactory: true,
 })
 export default class auth extends VuexModule {
-  token: String | null = null
-  syniosModules: SyniosModules[] | null = [
-    { Name: 'Dokumentviewer', link: '/viewer' },
-  ]
+  token: string | null = null
+  syniosModules: SyniosModules[] = [{ Name: 'Dokumentviewer', link: '/viewer' }]
 
   get isAutheticated(): boolean {
     return this.token != null
   }
 
-  get synModules(): SyniosModules[] | null {
+  get synModules(): SyniosModules[] {
     return this.syniosModules
   }
 
-  get syniosToken(): String | null {
+  get syniosToken(): string | null {
     let tCopy = this.token
     if (tCopy === null) return null
     if (tCopy[0] === '"') {
@@ -48,9 +46,11 @@ export default class auth extends VuexModule {
   async logout(): Promise<void> {
     const token = this.token
     this.clearToken()
+
     Cookies.remove('jwt')
     Cookies.remove('expirationDate')
     sheStore.setFrauParameter(null)
+
     if (process.client) {
       localStorage.removeItem('token')
       localStorage.removeItem('tokenExpiration')
@@ -58,8 +58,8 @@ export default class auth extends VuexModule {
       const logoutUrl = process.env.baseUrl + '/api/account/logout'
 
       sheStore.showCounter(false)
-
       sheStore.leftTimeCounter(0)
+
       return await $axios({
         method: 'get',
         url: logoutUrl,
@@ -101,6 +101,7 @@ export default class auth extends VuexModule {
 
         sheStore.leftTimeCounter(expiredIn)
         sheStore.showCounter(true)
+
         return true
       })
       .catch((e) => {
@@ -114,7 +115,6 @@ export default class auth extends VuexModule {
   initAuth(req: any): void {
     let token: string | null
     let expirationDate: string | null
-
     if (req) {
       if (!req.headers.cookie) {
         return
@@ -141,7 +141,7 @@ export default class auth extends VuexModule {
     ) {
       // eslint-disable-next-line no-console
       console.log('No token or invalid token')
-      this.logout().then(() => {})
+      this.context.dispatch('logout').then(() => {})
       return
     }
     this.setToken(token)

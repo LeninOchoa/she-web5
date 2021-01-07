@@ -76,12 +76,12 @@ export default {
   layout: 'signin',
   data() {
     return {
-      valid: true,
-      showPassword: false,
+      valid: true as boolean,
+      showPassword: false as boolean,
       user: {
         login: 'test',
         password: '123456',
-      },
+      } as Login,
     }
   },
   methods: {
@@ -90,7 +90,7 @@ export default {
         return
       }
       await authStore
-        .authenticateUser(this.user as Login)
+        .authenticateUser(this.user)
         .then(() => {
           this.$router.push('/')
         })

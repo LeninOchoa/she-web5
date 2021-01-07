@@ -47,20 +47,15 @@ export default {
   },
   methods: {
     stopTimer() {
-      /*
       if (this.$refs.vac === undefined) return
       this.$refs.vac.stopCountdown()
-
-       */
     },
     starTimer() {
-      /*
       if (this.$refs.vac === undefined) return
       this.$refs.vac.startCountdown()
-
-       */
     },
-    async final(): void {
+    async final(): Promise<void> {
+      console.log('TheFooter/final', this.lefttime)
       await authStore.logout().then(() => {
         this.$router.push('/signin')
       })

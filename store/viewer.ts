@@ -1,7 +1,10 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import Searchfield from '@/models/Searchfield'
+import BaumData from '@/models/BaumData'
+import Field from '@/models/Field'
+import { authStore } from '@/store'
+import { SearchParameterBaum } from '@/models/SearchParameter'
 import { $axios } from '~/utils/axios'
-import { authStore } from '~/store'
 
 @Module({
   name: 'viewer',
@@ -9,10 +12,10 @@ import { authStore } from '~/store'
   stateFactory: true,
 })
 export default class viewer extends VuexModule {
-  trees: Array<object> = []
+  public trees: BaumData[] = []
   searchFields: Searchfield[] = []
-  selectedSearchFields: Searchfield | null = null
-  searchParameter: Array<object> = []
+  selectedSearchFields: Searchfield = { treeId: 0, fields: [] }
+  searchParameter: SearchParameterBaum | null = null
   images: Array<object> = []
   searchedTree: Array<object> = []
   ebeneInfos: Array<object> = []
@@ -25,7 +28,7 @@ export default class viewer extends VuexModule {
   }
 
   @Mutation
-  setTrees(trees: Array<object>) {
+  setTrees(trees: BaumData[]) {
     this.trees = trees
   }
 
@@ -40,7 +43,7 @@ export default class viewer extends VuexModule {
   }
 
   @Mutation
-  setSearchParameter(payload: Array<object>) {
+  setSearchParameter(payload: SearchParameterBaum) {
     this.searchParameter = payload
   }
 
@@ -69,10 +72,10 @@ export default class viewer extends VuexModule {
   }
 
   @Action
-  async getTreeData(): Promise<Array<object> | null> {
+  async getTreeData(): Promise<BaumData[]> {
     const urlLicense = process.env.baseUrl + '/api/DocumentViewer/GetBaumData'
-    const token = authStore.token
-    if (token === null) return null
+    const token = authStore.syniosToken
+    if (token === null || token === undefined) return []
 
     return await $axios({
       method: 'get',
@@ -95,11 +98,11 @@ export default class viewer extends VuexModule {
   }
 
   @Action
-  async getTreeFields(treeId: number): Promise<object | null> {
+  async getTreeFields(treeId: number): Promise<Searchfield | null> {
     const apiUrl =
       process.env.baseUrl + '/api/DocumentViewer/GetSearchFields/' + treeId
 
-    const token = authStore.token
+    const token = authStore.syniosToken
     if (token === null) return null
 
     return await $axios({
@@ -114,9 +117,15 @@ export default class viewer extends VuexModule {
       },
     })
       .then((result) => {
-        const search: Searchfield = { treeId, fields: result.data }
+        const fields: Field[] = []
+        for (const index in result.data) {
+          const fi = result.data[index] as Field
+          fields.push(fi)
+        }
+        const search: Searchfield = { treeId, fields }
         this.setSearchfields(search)
         this.setCurrentFields(search)
+
         return search
       })
       .catch((error) => {

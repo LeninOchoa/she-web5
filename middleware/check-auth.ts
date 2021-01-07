@@ -1,5 +1,6 @@
 import { Middleware } from '@nuxt/types'
+import { authStore } from '@/store'
 const checkAuth: Middleware = (context) => {
-  context.store.dispatch('auth/initAuth', context.req)
+  authStore.initAuth(context.req)
 }
 export default checkAuth
