@@ -1,38 +1,46 @@
-import { GetterTree, MutationTree } from 'vuex'
+import { Module, VuexModule, Mutation } from 'vuex-module-decorators'
 import FrauParameter from '../models/FrauParameter'
 
-export const state = () => ({
-  ShowDrawer: false as boolean,
-  frauParameter: null as FrauParameter | null,
-  showSessionCounter: false as boolean,
-  leftTimeSessionCounter: 0 as number,
+@Module({
+  name: 'she',
+  namespaced: true,
+  stateFactory: true,
 })
+export default class she extends VuexModule {
+  ShowDrawer: boolean = false
+  frauParameter: FrauParameter | null = null
+  showSessionCounter: boolean = false
+  leftTimeSessionCounter: number = 0
 
-export type AnotherModuleState = ReturnType<typeof state>
+  get showDrawer(): boolean {
+    return this.ShowDrawer
+  }
 
-export const getters: GetterTree<AnotherModuleState, null> = {
-  showDrawer(state): boolean {
-    return state.ShowDrawer
-  },
-  getFrauParameter(state): FrauParameter | null {
-    return state.frauParameter
-  },
-  isFrau(state): boolean {
-    return state.frauParameter !== null
-  },
-}
+  get getFrauParameter(): FrauParameter | null {
+    return this.frauParameter
+  }
 
-export const mutations: MutationTree<AnotherModuleState> = {
-  showDrawer(state: any, show: boolean): void {
-    state.ShowDrawer = show
-  },
-  setFrauParameter(state: any, frau: FrauParameter | null): void {
-    state.frauParameter = frau
-  },
-  showSessionCounter(state: any, show: boolean): void {
-    state.showSessionCounter = show
-  },
-  leftTimeSessionCounter(state: any, time: number): void {
-    state.leftTimeSessionCounter = time
-  },
+  get isFrau(): boolean {
+    return this.frauParameter !== null
+  }
+
+  @Mutation
+  showMainDrawer(show: boolean): void {
+    this.ShowDrawer = show
+  }
+
+  @Mutation
+  setFrauParameter(frau: FrauParameter | null): void {
+    this.frauParameter = frau
+  }
+
+  @Mutation
+  showCounter(show: boolean): void {
+    this.showSessionCounter = show
+  }
+
+  @Mutation
+  leftTimeCounter(time: number): void {
+    this.leftTimeSessionCounter = time
+  }
 }

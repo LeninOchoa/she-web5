@@ -1,68 +1,78 @@
-import { ActionTree, GetterTree, MutationTree } from 'vuex'
+import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import Searchfield from '@/models/Searchfield'
 import { $axios } from '~/utils/axios'
+import { authStore } from '~/store'
 
-export const state = () => ({
-  trees: [] as Array<object>,
-  searchFields: [] as Searchfield[],
-  selectedSearchFields: [],
-  searchParameter: [],
-  images: [],
-  searchedTree: [],
-  ebeneInfos: [],
-  drawerL: true,
-  noticedPictures: [] as any[],
+@Module({
+  name: 'viewer',
+  namespaced: true,
+  stateFactory: true,
 })
+export default class viewer extends VuexModule {
+  trees: Array<object> = []
+  searchFields: Searchfield[] = []
+  selectedSearchFields: Searchfield | null = null
+  searchParameter: Array<object> = []
+  images: Array<object> = []
+  searchedTree: Array<object> = []
+  ebeneInfos: Array<object> = []
+  drawerL: boolean = true
+  noticedPictures: Array<object> = []
 
-export type AnotherModuleState = ReturnType<typeof state>
+  get isExistedNoticedPictures(): boolean {
+    if (this.noticedPictures === null) return false
+    return this.noticedPictures.length > 0
+  }
 
-export const getters: GetterTree<AnotherModuleState, null> = {
-  isExistedNoticedPictures(state): boolean {
-    if (state.noticedPictures === null) return false
-    return state.noticedPictures.length > 0
-  },
-}
+  @Mutation
+  setTrees(trees: Array<object>) {
+    this.trees = trees
+  }
 
-export const mutations: MutationTree<AnotherModuleState> = {
-  setTrees(state, trees: Array<object>) {
-    state.trees = trees
-  },
-  setSearchfields(state, payload) {
-    const fieldObject: Searchfield = {
-      treeId: payload.tree,
-      fields: payload.data,
-    }
-    state.searchFields.push(fieldObject)
-  },
-  setCurrentFields(state, payload) {
-    state.selectedSearchFields = payload
-  },
-  setSearchParameter(state, payload) {
-    state.searchParameter = payload
-  },
-  loadInViewer(state, payload) {
-    state.images = payload
-  },
-  loadEbeneInfos(state, payload) {
-    state.ebeneInfos = payload
-  },
-  setDrawerL(state, payload) {
-    state.drawerL = payload
-  },
-  setNoticedPictures(state, pic: any) {
-    if (state.noticedPictures === null) {
-      state.noticedPictures = [pic]
+  @Mutation
+  setSearchfields(payload: Searchfield) {
+    this.searchFields.push(payload)
+  }
+
+  @Mutation
+  setCurrentFields(payload: Searchfield) {
+    this.selectedSearchFields = payload
+  }
+
+  @Mutation
+  setSearchParameter(payload: Array<object>) {
+    this.searchParameter = payload
+  }
+
+  @Mutation
+  loadInViewer(payload: Array<object>) {
+    this.images = payload
+  }
+
+  @Mutation
+  loadEbeneInfos(payload: Array<object>) {
+    this.ebeneInfos = payload
+  }
+
+  @Mutation
+  setDrawerL(payload: boolean) {
+    this.drawerL = payload
+  }
+
+  @Mutation
+  setNoticedPictures(pic: any) {
+    if (this.noticedPictures === null) {
+      this.noticedPictures = [pic]
       return
     }
-    state.noticedPictures.push(pic)
-  },
-}
+    this.noticedPictures.push(pic)
+  }
 
-export const actions: ActionTree<AnotherModuleState, null> = {
-  async getTreeData(vuexContext) {
+  @Action
+  async getTreeData(): Promise<Array<object> | null> {
     const urlLicense = process.env.baseUrl + '/api/DocumentViewer/GetBaumData'
-    const token = vuexContext.rootGetters['auth/token']
-    if (token === null) return
+    const token = authStore.token
+    if (token === null) return null
 
     return await $axios({
       method: 'get',
@@ -76,21 +86,23 @@ export const actions: ActionTree<AnotherModuleState, null> = {
       },
     })
       .then((result) => {
-        vuexContext.commit('setTrees', result.data)
+        this.setTrees(result.data)
         return result.data
       })
       .catch((error) => {
         return Promise.reject(error.response)
       })
-  },
-  async getTreeFields(vuexContext, treeId: number) {
+  }
+
+  @Action
+  async getTreeFields(treeId: number): Promise<object | null> {
     const apiUrl =
       process.env.baseUrl + '/api/DocumentViewer/GetSearchFields/' + treeId
 
-    const token = vuexContext.rootGetters['auth/token']
-    if (token === null) return
+    const token = authStore.token
+    if (token === null) return null
 
-    return await this.$axios({
+    return await $axios({
       method: 'get',
       url: apiUrl,
       headers: {
@@ -102,18 +114,13 @@ export const actions: ActionTree<AnotherModuleState, null> = {
       },
     })
       .then((result) => {
-        vuexContext.commit('setSearchfields', {
-          tree: treeId,
-          data: result.data,
-        })
-        vuexContext.commit('setCurrentFields', result.data)
-        return {
-          tree: treeId,
-          data: result.data,
-        }
+        const search: Searchfield = { treeId, fields: result.data }
+        this.setSearchfields(search)
+        this.setCurrentFields(search)
+        return search
       })
       .catch((error) => {
         return Promise.reject(error.response)
       })
-  },
+  }
 }

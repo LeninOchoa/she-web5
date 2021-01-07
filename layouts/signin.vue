@@ -1,11 +1,10 @@
 <template>
   <v-app dark>
     <TheHeader />
-    <TheSidenav />
     <v-main>
-      <div>
+      <v-container>
         <nuxt />
-      </div>
+      </v-container>
     </v-main>
     <TheFooter />
   </v-app>
@@ -14,9 +13,8 @@
 <script>
 import TheHeader from '@/components/Navigation/TheHeader'
 import TheFooter from '@/components/Navigation/TheFooter'
-import TheSidenav from '@/components/Navigation/TheSidenav'
 export default {
-  middleware: ['check-auth', 'auth'],
-  components: { TheSidenav, TheFooter, TheHeader },
+  name: 'Signin',
+  components: { TheFooter, TheHeader },
 }
 </script>

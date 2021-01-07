@@ -1,65 +1,65 @@
-import { GetterTree, MutationTree, ActionTree } from 'vuex'
+import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 // @ts-ignore
 import Cookies from 'js-cookie'
 import SyniosModules from '../models/SyniosModules'
 import Login from '../models/Login'
 import { $axios } from '~/utils/axios'
+import { sheStore } from '~/store'
 
-export const state = () => ({
-  token: null as String | null,
-  modules: [{ Name: 'Dokumentviewer', link: '/viewer' }] as
-    | SyniosModules[]
-    | null,
+@Module({
+  name: 'auth',
+  namespaced: true,
+  stateFactory: true,
 })
+export default class auth extends VuexModule {
+  token: String | null = null
+  syniosModules: SyniosModules[] | null = [
+    { Name: 'Dokumentviewer', link: '/viewer' },
+  ]
 
-export type AnotherModuleState = ReturnType<typeof state>
+  get isAutheticated(): boolean {
+    return this.token != null
+  }
 
-export const getters: GetterTree<AnotherModuleState, null> = {
-  isAutheticated(state: any): boolean {
-    return state.token != null
-  },
-  modules(state: any): SyniosModules[] | null {
-    return state.modules
-  },
-  token(state: any): String | null {
-    let tCopy = state.token
-    if (state.token === null) return null
+  get synModules(): SyniosModules[] | null {
+    return this.syniosModules
+  }
+
+  get syniosToken(): String | null {
+    let tCopy = this.token
+    if (tCopy === null) return null
     if (tCopy[0] === '"') {
       tCopy = tCopy.substring(1, tCopy.length - 1)
     }
     return tCopy
-  },
-}
+  }
 
-export const mutations: MutationTree<AnotherModuleState> = {
-  setToken(state: any, token): void {
-    state.token = token
-  },
-  clearToken(state: any): void {
-    state.token = null
-  },
-}
+  @Mutation
+  setToken(token: string | null): void {
+    this.token = token
+  }
 
-export const actions: ActionTree<AnotherModuleState, null> = {
-  async logout(vuexContext): Promise<void> {
-    const token = vuexContext.rootGetters['auth/token']
-    vuexContext.commit('clearToken')
+  @Mutation
+  clearToken(): void {
+    this.token = null
+  }
+
+  @Action
+  async logout(): Promise<void> {
+    const token = this.token
+    this.clearToken()
     Cookies.remove('jwt')
     Cookies.remove('expirationDate')
-    vuexContext.commit('she/setFrauParameter', null, { root: true })
+    sheStore.setFrauParameter(null)
     if (process.client) {
       localStorage.removeItem('token')
       localStorage.removeItem('tokenExpiration')
       if (token === null) return
       const logoutUrl = process.env.baseUrl + '/api/account/logout'
 
-      vuexContext.commit('she/showSessionCounter', false, {
-        root: true,
-      })
+      sheStore.showCounter(false)
 
-      vuexContext.commit('she/leftTimeSessionCounter', 0, {
-        root: true,
-      })
+      sheStore.leftTimeCounter(0)
       return await $axios({
         method: 'get',
         url: logoutUrl,
@@ -76,8 +76,10 @@ export const actions: ActionTree<AnotherModuleState, null> = {
           return Promise.reject(error.response)
         })
     }
-  },
-  async authenticateUser(vuexContext, authData: Login) {
+  }
+
+  @Action
+  async authenticateUser(authData: Login): Promise<boolean> {
     const authUrl = process.env.baseUrl + '/token'
     const body = `grant_type=password&username=${authData.login}&password=${authData.password}&scope=viewer`
     return await $axios({
@@ -88,7 +90,7 @@ export const actions: ActionTree<AnotherModuleState, null> = {
     })
       .then((result) => {
         const expiredIn = Number.parseInt(result.data.expires_in) * 1000
-        vuexContext.commit('setToken', result.data.access_token)
+        this.setToken(result.data.access_token)
         localStorage.setItem('token', result.data.access_token)
         localStorage.setItem(
           'tokenExpiration',
@@ -97,12 +99,8 @@ export const actions: ActionTree<AnotherModuleState, null> = {
         Cookies.set('jwt', result.data.access_token)
         Cookies.set('expirationDate', String(new Date().getTime() + expiredIn))
 
-        vuexContext.commit('she/leftTimeSessionCounter', expiredIn, {
-          root: true,
-        })
-        vuexContext.commit('she/showSessionCounter', true, {
-          root: true,
-        })
+        sheStore.leftTimeCounter(expiredIn)
+        sheStore.showCounter(true)
         return true
       })
       .catch((e) => {
@@ -110,8 +108,10 @@ export const actions: ActionTree<AnotherModuleState, null> = {
         console.log(e)
         return Promise.reject(e)
       })
-  },
-  initAuth(vuexContext, req: any): void {
+  }
+
+  @Action
+  initAuth(req: any): void {
     let token: string | null
     let expirationDate: string | null
 
@@ -141,9 +141,9 @@ export const actions: ActionTree<AnotherModuleState, null> = {
     ) {
       // eslint-disable-next-line no-console
       console.log('No token or invalid token')
-      vuexContext.dispatch('logout')
+      this.logout().then(() => {})
       return
     }
-    vuexContext.commit('setToken', token)
-  },
+    this.setToken(token)
+  }
 }

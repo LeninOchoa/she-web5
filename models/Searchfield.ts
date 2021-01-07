@@ -1,4 +1,4 @@
 export default interface Searchfield {
-  treeId: any
+  treeId: number
   fields: any
 }
