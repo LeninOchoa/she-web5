@@ -9,6 +9,7 @@
       <v-btn
         type="submit"
         block
+        outlined
         class="p-2 white--text"
         color="grey lighten-1"
         dark

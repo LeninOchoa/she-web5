@@ -81,7 +81,6 @@ export default {
       return viewerStore.drawerL
     },
     storeImages(): LoadedImages {
-      console.log('LoadedImages', viewerStore.images)
       return viewerStore.images
     },
   },
@@ -100,7 +99,7 @@ export default {
   },
   methods: {
     ShowPictures() {
-      console.log('ShowPictures', this.loadedImages)
+      if (this.loadedImages === null) return
       if (this.loadedImages.images === null) return
       if (this.loadedImages.images.length === 0) return
 
