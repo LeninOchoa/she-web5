@@ -12,6 +12,8 @@ export default {
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/se.ico' }],
   },
 
+  loading: { color: '#fa923f', height: '4px' },
+
   // Global CSS (https://go.nuxtjs.dev/config-css)
   css: ['~assets/styles/main.css'],
 
@@ -58,6 +60,7 @@ export default {
           warning: colors.amber.base,
           error: colors.deepOrange.accent4,
           success: colors.green.accent3,
+          background: '#00469B', // Not automatically applied
         },
         light: {
           background: '#00469B', // Not automatically applied

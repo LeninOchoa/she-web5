@@ -1,11 +1,14 @@
+import SynNodeData from '@/models/SynNodeData'
+import { DysplaySynNodeInfo } from '~/models/SysNodeInfo'
+
 export default interface SynNode {
   ico: string
   name: string
-  children: SynNode[]
-  data: object
+  children: SynNode[] | null
+  data: SynNodeData
   id: number
-  files: []
-  imageUrls: []
-  parent: null
-  Information: null
+  files: string[] | null
+  imageUrls: string[] | null
+  parent: SynNode | null
+  Information: DysplaySynNodeInfo[] | null
 }

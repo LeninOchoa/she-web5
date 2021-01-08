@@ -14,7 +14,7 @@ export default interface SynNodeData {
   IsDummy: boolean
   KnotenEbene: number
   OcrEbene: boolean
-  PKID: string[]
+  PKID: number[]
   PKSpalte: null
   PapieraktenStatus: null
   PapieraktenStatusID: number
@@ -26,5 +26,5 @@ export default interface SynNodeData {
   Text: string
   TitelA: string | null
   TitelB: string | null
-  sPKID: string | null
+  sPKID: string[] | null
 }

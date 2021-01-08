@@ -72,14 +72,12 @@
 import { viewerStore } from '@/store'
 import Searchfield from '@/models/Searchfield'
 import { SearchParameter, SearchParameterBaum } from '@/models/SearchParameter'
+
 export default {
   name: 'Search',
   computed: {
     selectedSearchFields(): Searchfield {
-      const val: Searchfield = JSON.parse(
-        JSON.stringify(viewerStore.selectedSearchFields)
-      )
-      return val
+      return JSON.parse(JSON.stringify(viewerStore.selectedSearchFields))
     },
   },
   methods: {

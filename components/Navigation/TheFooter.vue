@@ -31,6 +31,11 @@
 import { sheStore, authStore } from '@/store'
 
 export default {
+  data() {
+    return {
+      start: false as boolean,
+    }
+  },
   computed: {
     lefttime(): number {
       return sheStore.leftTimeSessionCounter
@@ -52,11 +57,14 @@ export default {
     },
     starTimer() {
       if (this.$refs.vac === undefined) return
+      this.start = true
       this.$refs.vac.startCountdown()
     },
     async final(): Promise<void> {
+      if (this.start === false) return
       console.log('TheFooter/final', this.lefttime)
       await authStore.logout().then(() => {
+        this.start = false
         this.$router.push('/signin')
       })
     },

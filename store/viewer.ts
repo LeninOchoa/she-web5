@@ -3,7 +3,8 @@ import Searchfield from '@/models/Searchfield'
 import BaumData from '@/models/BaumData'
 import Field from '@/models/Field'
 import { authStore } from '@/store'
-import { SearchParameterBaum } from '@/models/SearchParameter'
+import { LoadedImages, SearchParameterBaum } from '@/models/SearchParameter'
+import { DysplaySynNodeInfo } from '../models/SysNodeInfo'
 import { $axios } from '~/utils/axios'
 
 @Module({
@@ -16,9 +17,8 @@ export default class viewer extends VuexModule {
   searchFields: Searchfield[] = []
   selectedSearchFields: Searchfield = { treeId: 0, fields: [] }
   searchParameter: SearchParameterBaum | null = null
-  images: Array<object> = []
-  searchedTree: Array<object> = []
-  ebeneInfos: Array<object> = []
+  images: LoadedImages | null = { files: [], images: [] }
+  ebeneInfos: DysplaySynNodeInfo[] = []
   drawerL: boolean = true
   noticedPictures: Array<object> = []
 
@@ -48,12 +48,12 @@ export default class viewer extends VuexModule {
   }
 
   @Mutation
-  loadInViewer(payload: Array<object>) {
+  loadInViewer(payload: LoadedImages) {
     this.images = payload
   }
 
   @Mutation
-  loadEbeneInfos(payload: Array<object>) {
+  loadEbeneInfos(payload: DysplaySynNodeInfo[]) {
     this.ebeneInfos = payload
   }
 
@@ -118,7 +118,8 @@ export default class viewer extends VuexModule {
     })
       .then((result) => {
         const fields: Field[] = []
-        for (const index in result.data) {
+        const keys = Object.keys(result.data)
+        for (const index in keys) {
           const fi = result.data[index] as Field
           fields.push(fi)
         }

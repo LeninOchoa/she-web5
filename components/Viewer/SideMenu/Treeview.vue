@@ -43,9 +43,19 @@
 
 <script lang="ts">
 import { viewerStore, authStore } from '@/store'
-import { SearchParameterBaum } from '@/models/SearchParameter'
+import {
+  SearchChildren,
+  SearchParameterBaum,
+  Parent,
+  LoadedImages,
+} from '@/models/SearchParameter'
 import SynNode from '@/models/SynNode'
-import { searchRootNodes } from '~/services/viewer/ViewerService'
+import { DysplaySynNodeInfo, SynNodeInfo } from '@/models/SysNodeInfo'
+import {
+  searchRootNodes,
+  loadChildren,
+  GetInformation,
+} from '~/services/viewer/ViewerService'
 export default {
   data: () => ({
     files: {
@@ -73,14 +83,56 @@ export default {
     },
   },
   methods: {
-    fetchNodes(item) {
-      console.log('Treeview/fetchNodes', item)
+    async fetchNodes(item: SynNode) {
+      const parent: Parent = {
+        EbeneID: item.data.EbeneID,
+        PKID: item.data.PKID,
+        sPKID: item.data.sPKID,
+        BelegTypID: item.data.BelegTypID,
+        parent: Object.assign({}, item),
+      }
+
+      const param: SearchChildren = {
+        treeId: viewerStore.searchParameter.treeId,
+        ParentNode: parent,
+        Sfs: JSON.parse(
+          JSON.stringify(viewerStore.searchParameter.SearchParameter)
+        ),
+      }
+      const token = authStore.syniosToken
+      await loadChildren(param, token).then((res) => {
+        if (res.nodes.length !== 0) {
+          item.children = res.nodes
+
+          if (this.expand) {
+            for (const index in res.nodes) {
+              const node = res.nodes[index]
+              this.fetchNodes(node)
+              if (this.open.includes(item.id) === false) {
+                this.open = [...this.open, item.id]
+              }
+            }
+          }
+        } else {
+          item.children = []
+        }
+
+        if (res.images.files.length > 0) {
+          if (res.images.files.length === 0) {
+            item.files = res.images.files
+            item.imageUrls = res.images.images
+            if (this.expand === false) {
+              viewerStore.loadInViewer(res.images)
+            }
+          }
+        }
+      })
     },
 
-    async rootNodes(param) {
+    async rootNodes(param: SearchParameterBaum) {
       viewerStore.loadEbeneInfos([])
-      viewerStore.loadInViewer([])
-      const token = authStore.token
+      viewerStore.loadInViewer(null)
+      const token = authStore.syniosToken
       await searchRootNodes(param, token).then((res) => {
         if (res.length > 0) this.activeTab = 1
         this.items = []
@@ -89,8 +141,58 @@ export default {
         }, 500)
       })
     },
-    onClick(item) {
-      console.log('Treeview/onClick', item)
+
+    async onClick(item: SynNode) {
+      this.expand = false
+      const img: LoadedImages = { files: item.files, images: item.imageUrls }
+      if (item.imageUrls.length > 0) viewerStore.loadInViewer(img)
+
+      if (item.Information !== null) {
+        viewerStore.loadEbeneInfos(item.Information)
+        return
+      }
+
+      const EbeneIds: number[] = []
+      const Pkids: Array<number[]> = []
+
+      let node = item
+      while (node != null) {
+        if (EbeneIds.includes(node.data.EbeneID) === false) {
+          EbeneIds.push(node.data.EbeneID)
+        }
+
+        const arr: number[] = []
+        for (const index in node.data.PKID) {
+          if (arr.includes(node.data.PKID[index]) === false) {
+            arr.push(node.data.PKID[index])
+          }
+        }
+        Pkids.push(arr)
+        node = node.parent
+      }
+      const rest: SynNodeInfo[] = await GetInformation(
+        EbeneIds,
+        Pkids,
+        authStore.syniosToken
+      )
+      const infos: DysplaySynNodeInfo[] = []
+      const keys = Object.keys(rest)
+      for (const index in keys) {
+        const obj = rest[index]
+        if (obj === null || obj.InfoEbeneSpalten == null) continue
+        for (const index2 in obj.InfoEbeneSpalten) {
+          const info = obj.InfoEbeneSpalten[index2]
+          const temp: DysplaySynNodeInfo = {
+            ebene: obj.Bezeichnung,
+            name: info.Name,
+            value: info.ColumnValue,
+          }
+          infos.push(temp)
+        }
+      }
+
+      item.Information = Object.assign({}, infos)
+      viewerStore.loadEbeneInfos(item.Information)
     },
     onClickMenu(item) {
       if (!this.open.includes(item.id)) {
