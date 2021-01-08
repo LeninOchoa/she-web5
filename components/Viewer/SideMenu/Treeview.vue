@@ -118,12 +118,10 @@ export default {
         }
 
         if (res.images.files.length > 0) {
-          if (res.images.files.length === 0) {
-            item.files = res.images.files
-            item.imageUrls = res.images.images
-            if (this.expand === false) {
-              viewerStore.loadInViewer(res.images)
-            }
+          item.files = res.images.files
+          item.imageUrls = res.images.images
+          if (this.expand === false) {
+            viewerStore.loadInViewer(res.images)
           }
         }
       })
@@ -144,8 +142,10 @@ export default {
 
     async onClick(item: SynNode) {
       this.expand = false
-      const img: LoadedImages = { files: item.files, images: item.imageUrls }
-      if (item.imageUrls.length > 0) viewerStore.loadInViewer(img)
+      if (item.imageUrls.length > 0) {
+        const img: LoadedImages = { files: item.files, images: item.imageUrls }
+        viewerStore.loadInViewer(img)
+      }
 
       if (item.Information !== null) {
         viewerStore.loadEbeneInfos(item.Information)

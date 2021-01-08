@@ -5,6 +5,7 @@ import Field from '@/models/Field'
 import { authStore } from '@/store'
 import { LoadedImages, SearchParameterBaum } from '@/models/SearchParameter'
 import { DysplaySynNodeInfo } from '../models/SysNodeInfo'
+import { SynImage } from '../models/SynImages'
 import { $axios } from '~/utils/axios'
 
 @Module({
@@ -20,7 +21,7 @@ export default class viewer extends VuexModule {
   images: LoadedImages | null = { files: [], images: [] }
   ebeneInfos: DysplaySynNodeInfo[] = []
   drawerL: boolean = true
-  noticedPictures: Array<object> = []
+  noticedPictures: SynImage[] = []
 
   get isExistedNoticedPictures(): boolean {
     if (this.noticedPictures === null) return false
@@ -63,7 +64,7 @@ export default class viewer extends VuexModule {
   }
 
   @Mutation
-  setNoticedPictures(pic: any) {
+  setNoticedPictures(pic: SynImage) {
     if (this.noticedPictures === null) {
       this.noticedPictures = [pic]
       return

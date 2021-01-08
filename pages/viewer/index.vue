@@ -2,6 +2,7 @@
   <div>
     <!--The SideMenu Component go here-->
     <SideMenu></SideMenu>
+    <SideMenuRight></SideMenuRight>
 
     <v-toolbar color="primary" flat dense>
       <v-app-bar-nav-icon
@@ -42,20 +43,30 @@
     </v-toolbar>
 
     <v-tabs-items v-model="tab">
-      <v-tab-item :eager="true"> </v-tab-item>
       <v-tab-item :eager="true">
-        <v-container fluid> </v-container>
+        <MainViewer></MainViewer>
+      </v-tab-item>
+      <v-tab-item :eager="true">
+        <v-container fluid>
+          <MerkenViewer></MerkenViewer>
+        </v-container>
       </v-tab-item>
     </v-tabs-items>
   </div>
 </template>
 
 <script lang="ts">
-import SideMenu from '@/components/Viewer/SideMenu/SideMenu.vue'
+import MainViewer from '@/components/Viewer/MainViewer.vue'
+import MerkenViewer from '@/components/Viewer/MerkenViewer.vue'
 import { viewerStore } from '@/store'
+import SideMenuRight from '~/components/Viewer/SideMenuRight/SideMenuRight'
+import SideMenu from '~/components/Viewer/SideMenu/SideMenu.vue'
 export default {
   components: {
+    SideMenuRight,
     SideMenu,
+    MerkenViewer,
+    MainViewer,
   },
   data() {
     return {

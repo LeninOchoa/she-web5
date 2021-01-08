@@ -54,12 +54,14 @@
   </v-container>
 </template>
 
-<script>
-import { mapMutations, mapState } from 'vuex'
+<script lang="ts">
 import OpenSeadragon from 'openseadragon'
 import { v4 as uuidv4 } from 'uuid'
-import { PrintImages } from '~/modules/she/Print'
-window.OpenSeadragon = OpenSeadragon
+import { viewerStore } from '@/store'
+import { PrintImages } from '@/services/she/Print'
+import { LoadedImages } from '@/models/SearchParameter'
+import { SynImage } from '../../models/SynImages'
+// window.OpenSeadragon = OpenSeadragon
 
 export default {
   name: 'MainViewer',
@@ -70,20 +72,23 @@ export default {
       contentBuffer: [],
       ima: null,
       images: [],
-      imageUrls: {},
+      loadedImages: { files: [], images: [] } as LoadedImages,
       cards: [],
     }
   },
   computed: {
-    ...mapState({
-      drawerLeft: (state) => state.viewer.drawerL,
-      storeImages: (state) => state.viewer.images,
-    }),
+    drawerLeft(): boolean {
+      return viewerStore.drawerL
+    },
+    storeImages(): LoadedImages {
+      console.log('LoadedImages', viewerStore.images)
+      return viewerStore.images
+    },
   },
   watch: {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    storeImages(newCount, oldCount) {
-      this.imageUrls = newCount
+    storeImages(newCount: LoadedImages, oldCount: LoadedImages) {
+      this.loadedImages = newCount
       this.ShowPictures()
     },
   },
@@ -94,29 +99,30 @@ export default {
     })
   },
   methods: {
-    ...mapMutations({
-      setDrawerL: 'viewer/setDrawerL',
-      setNoticedPictures: 'viewer/setNoticedPictures',
-      deleteNoticedPictures: 'viewer/deleteNoticedPictures',
-    }),
     ShowPictures() {
-      // this.clearViewer()
-      const imgs = []
-      for (let index = 0; index < this.imageUrls.length; ++index) {
-        const item = this.imageUrls[index]
-        imgs.push({
-          index,
+      console.log('ShowPictures', this.loadedImages)
+      if (this.loadedImages.images === null) return
+      if (this.loadedImages.images.length === 0) return
+
+      const imgs: SynImage[] = []
+      const keys = Object.keys(this.loadedImages.images)
+      for (const index in keys) {
+        const item = this.loadedImages.images[index]
+        const img: SynImage = {
+          index: parseInt(index),
           id: uuidv4(),
           src: item,
           marked: false,
-        })
+        }
+        imgs.push(img)
       }
+      this.cards = imgs
       if (imgs.length > 0) {
         this.activateCard(imgs[0])
       }
-      this.cards = imgs
     },
-    initViewer() {
+    initViewer(): void {
+      if (this.viewer !== null) return
       this.viewer = OpenSeadragon({
         id: 'viewer-image',
         animationTime: 0.4,
@@ -146,7 +152,7 @@ export default {
       this.viewer.tileSources = []
       this.viewer.open(this.images)
     },
-    activateCard(param) {
+    activateCard(param: SynImage) {
       this.clearViewer()
       this.images.push({
         type: 'image',
@@ -154,9 +160,8 @@ export default {
       })
       this.viewer.open(this.images)
     },
-    checkMark(param) {
-      console.log('checkMark', param)
-      this.setNoticedPictures({ id: param.id, src: param.src })
+    checkMark(param: SynImage) {
+      viewerStore.setNoticedPictures(param)
 
       const index = this.cards.findIndex((c) => c.id === param.id)
       if (index === -1) return

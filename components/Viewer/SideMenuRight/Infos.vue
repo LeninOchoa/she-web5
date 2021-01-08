@@ -13,7 +13,9 @@
   ></v-data-table>
 </template>
 
-<script>
+<script lang="ts">
+import { viewerStore } from '@/store'
+import { DysplaySynNodeInfo } from '../../../models/SysNodeInfo'
 export default {
   data() {
     return {
@@ -26,21 +28,22 @@ export default {
         { text: 'Ebene', value: 'ebene' },
         { text: 'Value', value: 'value', groupable: false },
       ],
-      ebenen: [],
+      ebenen: [] as DysplaySynNodeInfo[],
     }
   },
   computed: {
-    infos() {
-      return this.$store.state.viewer.ebeneInfos
+    infos(): DysplaySynNodeInfo[] {
+      return viewerStore.ebeneInfos
     },
   },
   watch: {
-    infos(newValue, oldValue) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    infos(newValue: DysplaySynNodeInfo[], oldValue: DysplaySynNodeInfo[]) {
       this.setEbenen(newValue)
     },
   },
   methods: {
-    setEbenen(list) {
+    setEbenen(list: DysplaySynNodeInfo[]) {
       const temp = []
       for (const index in list) {
         const item = list[index]

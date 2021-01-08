@@ -62,7 +62,6 @@ export default {
     },
     async final(): Promise<void> {
       if (this.start === false) return
-      console.log('TheFooter/final', this.lefttime)
       await authStore.logout().then(() => {
         this.start = false
         this.$router.push('/signin')

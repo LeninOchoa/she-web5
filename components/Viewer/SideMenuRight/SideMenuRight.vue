@@ -43,7 +43,7 @@
   </v-card>
 </template>
 
-<script>
+<script lang="ts">
 import Infos from '~/components/Viewer/SideMenuRight/Infos'
 import Archiv from '~/components/Viewer/SideMenuRight/Archiv'
 export default {
@@ -97,7 +97,7 @@ export default {
 
       drawerBorder.addEventListener(
         'mousedown',
-        (e) => {
+        (e: any) => {
           if (e.offsetX < minSize) {
             el.style.transition = 'initial'
             document.addEventListener('mousemove', resize, false)
