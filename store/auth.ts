@@ -1,5 +1,5 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
-import { sheStore } from '@/store'
+import { sheStore, viewerStore } from '@/store'
 // @ts-ignore
 import Cookies from 'js-cookie'
 import SyniosModules from '../models/SyniosModules'
@@ -101,6 +101,7 @@ export default class auth extends VuexModule {
 
         sheStore.leftTimeCounter(expiredIn)
         sheStore.showCounter(true)
+        viewerStore.clearNoticedPicturesToNull()
 
         return true
       })

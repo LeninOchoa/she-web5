@@ -73,6 +73,11 @@ export default class viewer extends VuexModule {
   }
 
   @Mutation
+  clearNoticedPicturesToNull() {
+    this.noticedPictures = []
+  }
+
+  @Mutation
   removeNoticedPictures(pic: SynImage) {
     if (this.noticedPictures === null) return
 

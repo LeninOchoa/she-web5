@@ -8,52 +8,53 @@
       />
     </v-row>
     <v-row>
-      <div class="parent">
-        <v-hover
-          v-for="card in cards"
-          v-slot="{ hover }"
-          :key="card.index"
-          class="hoverCursor"
-          open-delay="50"
-        >
-          <v-card
-            :elevation="hover ? 16 : 2"
-            :class="{ 'on-hover': hover }"
-            class="ma-5"
-          >
-            <v-img
-              :src="card.src"
-              max-height="150"
-              max-width="150"
-              min-height="150"
-              min-width="150"
-              @click="activateCard(card)"
+      <v-slide-group
+        v-model="model"
+        class="parent"
+        active-class="success"
+        show-arrows
+      >
+        <v-slide-item v-for="card in cards" :key="card.index">
+          <v-hover v-slot="{ hover }" class="hoverCursor" open-delay="50">
+            <v-card
+              :elevation="hover ? 16 : 2"
+              :class="{ 'on-hover': hover }"
+              class="ma-5"
             >
-            </v-img>
-            <v-card-actions>
-              <v-spacer></v-spacer>
+              <v-img
+                :src="card.src"
+                max-height="150"
+                max-width="150"
+                min-height="150"
+                min-width="150"
+                @click="activateCard(card)"
+              >
+              </v-img>
+              <v-card-actions>
+                <v-spacer></v-spacer>
 
-              <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    icon
-                    v-bind="attrs"
-                    @click="addToMaredkList(card)"
-                    v-on="on"
-                  >
-                    <v-icon>mdi-bookmark-outline</v-icon>
-                  </v-btn>
-                </template>
-                <span>Dokument merken</span>
-              </v-tooltip>
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      icon
+                      v-bind="attrs"
+                      @click="addToMaredkList(card)"
+                      v-on="on"
+                    >
+                      <v-icon>mdi-bookmark-outline</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Dokument merken</span>
+                </v-tooltip>
 
-              <v-btn icon @click="printer(card)">
-                <v-icon>mdi-printer</v-icon>
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-hover>
-      </div>
+                <v-btn icon @click="printer(card)">
+                  <v-icon>mdi-printer</v-icon>
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-hover>
+        </v-slide-item>
+      </v-slide-group>
     </v-row>
   </v-container>
 </template>
@@ -71,6 +72,7 @@ export default {
   name: 'MainViewer',
   data() {
     return {
+      model: null,
       tab: null,
       viewer: null,
       ima: null,
@@ -96,7 +98,7 @@ export default {
   },
   mounted() {
     if (this.viewer === null) this.initViewer()
-    this.$root.$on('clearViewer', () => {
+    this.$root.$on('clearMainViewer', () => {
       this.clearViewer()
     })
   },
@@ -179,8 +181,6 @@ export default {
   align-items: center;
   width: 100%;
   height: 100%;
-  background-color: white;
-  overflow-x: auto;
 }
 .hoverCursor:hover {
   cursor: pointer;

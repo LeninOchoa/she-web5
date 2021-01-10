@@ -63,7 +63,6 @@
 import MainViewer from '@/components/Viewer/MainViewer.vue'
 import MerkenViewer from '@/components/Viewer/MerkenViewer.vue'
 import { viewerStore } from '@/store'
-import { SynImage } from '../../models/SynImages'
 import SideMenuRight from '~/components/Viewer/SideMenuRight/SideMenuRight'
 import SideMenu from '~/components/Viewer/SideMenu/SideMenu.vue'
 export default {

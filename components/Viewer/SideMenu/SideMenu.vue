@@ -158,7 +158,7 @@ export default {
     },
     search(param: SearchParameterBaum) {
       param.treeId = this.select.BaumId
-      this.$root.$emit('clearViewer')
+      this.$root.$emit('clearMainViewer')
       viewerStore.setSearchParameter(param)
       this.activeTab = 1
     },
