@@ -35,9 +35,13 @@
 
               <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
-                  <v-btn icon v-bind="attrs" @click="checkMark(card)" v-on="on">
-                    <v-icon v-if="card.marked">mdi-checkbox-marked</v-icon>
-                    <v-icon v-else>mdi-checkbox-blank-outline</v-icon>
+                  <v-btn
+                    icon
+                    v-bind="attrs"
+                    @click="addToMaredkList(card)"
+                    v-on="on"
+                  >
+                    <v-icon>mdi-bookmark-outline</v-icon>
                   </v-btn>
                 </template>
                 <span>Dokument merken</span>
@@ -69,11 +73,10 @@ export default {
     return {
       tab: null,
       viewer: null,
-      contentBuffer: [],
       ima: null,
       images: [],
       loadedImages: { files: [], images: [] } as LoadedImages,
-      cards: [],
+      cards: [] as SynImage[],
     }
   },
   computed: {
@@ -159,12 +162,8 @@ export default {
       })
       this.viewer.open(this.images)
     },
-    checkMark(param: SynImage) {
+    addToMaredkList(param: SynImage) {
       viewerStore.setNoticedPictures(param)
-
-      const index = this.cards.findIndex((c) => c.id === param.id)
-      if (index === -1) return
-      this.cards[index].marked = !param.marked
     },
     printer(param) {
       PrintImages(param.src)

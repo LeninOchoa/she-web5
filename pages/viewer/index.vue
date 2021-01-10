@@ -13,7 +13,11 @@
       <v-tabs v-model="tab" align-with-title dark>
         <v-tabs-slider color="white"></v-tabs-slider>
         <v-tab key>Viewer</v-tab>
-        <v-tab v-show="ShowViewer">gemerkte Bilder</v-tab>
+        <v-tab v-show="ShowViewer">
+          <v-badge color="red" :content="storeImages"
+            >gemerkte Bilder
+          </v-badge></v-tab
+        >
       </v-tabs>
 
       <v-spacer></v-spacer>
@@ -59,6 +63,7 @@
 import MainViewer from '@/components/Viewer/MainViewer.vue'
 import MerkenViewer from '@/components/Viewer/MerkenViewer.vue'
 import { viewerStore } from '@/store'
+import { SynImage } from '../../models/SynImages'
 import SideMenuRight from '~/components/Viewer/SideMenuRight/SideMenuRight'
 import SideMenu from '~/components/Viewer/SideMenu/SideMenu.vue'
 export default {
@@ -80,8 +85,16 @@ export default {
     ShowViewer(): boolean {
       return viewerStore.isExistedNoticedPictures
     },
+    storeImages(): number {
+      if (viewerStore.noticedPictures === null) return 0
+      if (viewerStore.noticedPictures.length === 0) this.setTab(0)
+      return viewerStore.noticedPictures.length
+    },
   },
   methods: {
+    setTab(index: number) {
+      this.tab = index
+    },
     drawerClick() {
       viewerStore.setDrawerL(!this.drawerLeft)
     },

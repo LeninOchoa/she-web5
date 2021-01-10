@@ -72,6 +72,15 @@ export default class viewer extends VuexModule {
     this.noticedPictures.push(pic)
   }
 
+  @Mutation
+  removeNoticedPictures(pic: SynImage) {
+    if (this.noticedPictures === null) return
+
+    this.noticedPictures = this.noticedPictures.filter(function (item) {
+      return item.id !== pic.id
+    })
+  }
+
   @Action
   async getTreeData(): Promise<BaumData[]> {
     const urlLicense = process.env.baseUrl + '/api/DocumentViewer/GetBaumData'
